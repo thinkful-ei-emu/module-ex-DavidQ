@@ -82,7 +82,9 @@ function renderShoppingList(items = STORE.items) {
 
 function addItemToShoppingList(itemName) {
   console.log(`Adding "${itemName}" to shopping list`);
-  STORE.items.push({id: cuid(), name: itemName, checked: false});
+  let newItem =new item(itemName);
+  STORE.items.push(newItem);
+  displayedItems.push(newItem);
 }
 
 function handleNewItemSubmit() {
@@ -114,7 +116,7 @@ function handleItemCheckClicked() {
     console.log('`handleItemCheckClicked` ran');
     const id = getItemIdFromElement(event.currentTarget);
     toggleCheckedForListItem(id);
-    renderShoppingList();
+    renderShoppingList(displayedItems);
   });
 }
 
@@ -125,7 +127,8 @@ function handleDeleteItemClicked() {
   $('.js-shopping-list').on('click','.js-item-delete',e=>{
     let itemToRemove = STORE.items.find(x=>x.id === getItemIdFromElement(e.currentTarget));
     STORE.items.splice(STORE.items.indexOf(itemToRemove),1);
-    renderShoppingList();
+    displayedItems.splice(displayedItems.indexOf(itemToRemove),1);
+    renderShoppingList(displayedItems);
 
   });
   console.log('`handleDeleteItemClicked` ran');
@@ -136,7 +139,7 @@ function handleHideCheckedTogg(){
 
   $('#js-checkBox').change((e)=>{
     STORE.hide = !STORE.hide;  
-    renderShoppingList();
+    renderShoppingList(displayedItems);
   });
 
 }
@@ -146,7 +149,7 @@ function handleEdit(){
     e.preventDefault();
     let userInput = prompt('New name:');
     STORE.items.find(x=>x.id===id).name = userInput;
-    renderShoppingList();
+    renderShoppingList(displayedItems);
   });
 }
 /* 
@@ -161,20 +164,28 @@ function handleSearch(){
   $('#searchBox').submit((e)=>{
     e.preventDefault();
     console.log('Searching...');
-    const displayedItems = [...STORE.items];
-    renderShoppingList(displayedItems.filter(i=>{
+    
+    displayedItems = displayedItems.filter(i=>{
       let searchTerm =$('.js-search').val();
       return i.name.includes(searchTerm);
-    }));
+    });
+    renderShoppingList(displayedItems);
 
   });
 
 }
 
 
+var displayedItems = [...STORE.items];// now a global var so that every function can check it
 
+function clearSearch(){
+  $('#clear').click(()=>{
+    $('.js-search').val('');
+    displayedItems = [...STORE.items];
+    renderShoppingList(displayedItems);
+  });
 
-
+}
 //// end my code
 
 // this function will be our callback when the page loads. it's responsible for
@@ -182,6 +193,7 @@ function handleSearch(){
 // that handle new item submission and user clicks on the "check" and "delete" buttons
 // for individual shopping list items.
 function handleShoppingList() {
+
   renderShoppingList();
   handleNewItemSubmit();
   handleItemCheckClicked();
@@ -189,6 +201,7 @@ function handleShoppingList() {
   handleHideCheckedTogg();
   handleEdit();
   handleSearch();
+  clearSearch();
   
 }
 
