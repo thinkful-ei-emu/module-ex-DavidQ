@@ -65,11 +65,15 @@ function generateShoppingItemsString(shoppingList) {
   return items.join('');
 }
 
-
-function renderShoppingList() {
+/**now accepts an optional param 
+*if the render caller wants to change
+*@params{array}
+**/
+function renderShoppingList(items = STORE.items) {
   // render the shopping list in the DOM
   console.log('`renderShoppingList` ran');
-  const shoppingListItemsString = generateShoppingItemsString(STORE.items);
+  //changed this function to accept params
+  const shoppingListItemsString = generateShoppingItemsString(items);
 
   // insert that HTML into the DOM
   $('.js-shopping-list').html(shoppingListItemsString);
@@ -145,6 +149,27 @@ function handleEdit(){
     renderShoppingList();
   });
 }
+/* 
+when a user enter text this function 
+will create a new list on 
+containing search items */
+/**
+ *  @param{null}
+ * @returns new list of items conataining search results 
+ * */
+function handleSearch(){
+  $('#searchBox').submit((e)=>{
+    e.preventDefault();
+    console.log('Searching...');
+    const displayedItems = [...STORE.items];
+    renderShoppingList(displayedItems.filter(i=>{
+      let searchTerm =$('.js-search').val();
+      return i.name.includes(searchTerm);
+    }));
+
+  });
+
+}
 
 
 
@@ -163,6 +188,8 @@ function handleShoppingList() {
   handleDeleteItemClicked();
   handleHideCheckedTogg();
   handleEdit();
+  handleSearch();
+  
 }
 
 // when the page loads, call `handleShoppingList`
