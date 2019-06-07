@@ -1,17 +1,34 @@
+/* eslint-disable no-console */
 'use strict';
+/**eslint-env jquery */
+// a template class for items
+/**
+ *  @param {string,bool} name and if it is checked, checked is otional
+ *  
+ * */
+class item{
+  constructor(Name, Checked = false){
+    this.id = cuid();
+    this.createdDate = Date.now();
+    this.name = Name;
+    this.checked = Checked;
+  }
+}
+const STORE = {
+  items:[
+    new item('apples'),
+    new item('oranges'),
+    new item('milk',true)
+  ],
+  hide:false,
 
-const STORE = [
-  {id: cuid(), name: "apples", checked: false},
-  {id: cuid(), name: "oranges", checked: false},
-  {id: cuid(), name: "milk", checked: true},
-  {id: cuid(), name: "bread", checked: false}
-];
+};
 
 
 function generateItemElement(item) {
   return `
     <li data-item-id="${item.id}">
-      <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>
+      <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
       <div class="shopping-item-controls">
         <button class="shopping-item-toggle js-item-toggle">
             <span class="button-label">check</span>
@@ -25,18 +42,30 @@ function generateItemElement(item) {
 
 
 function generateShoppingItemsString(shoppingList) {
-  console.log("Generating shopping list element");
+  console.log('Generating shopping list element');
 
-  const items = shoppingList.map((item) => generateItemElement(item));
+  const items = shoppingList.map((item) => {
+    if(STORE.hide){
+      if(item.checked){
+        console.log(`checked item ${item.name} found ${item.checked}`);
+        return '';
+      }else{
+        return generateItemElement(item);
+      }
+    }else{
+      return generateItemElement(item);
+    }
   
-  return items.join("");
+  });
+  
+  return items.join('');
 }
 
 
 function renderShoppingList() {
   // render the shopping list in the DOM
   console.log('`renderShoppingList` ran');
-  const shoppingListItemsString = generateShoppingItemsString(STORE);
+  const shoppingListItemsString = generateShoppingItemsString(STORE.items);
 
   // insert that HTML into the DOM
   $('.js-shopping-list').html(shoppingListItemsString);
@@ -45,7 +74,7 @@ function renderShoppingList() {
 
 function addItemToShoppingList(itemName) {
   console.log(`Adding "${itemName}" to shopping list`);
-  STORE.push({id: cuid(), name: itemName, checked: false});
+  STORE.items.push({id: cuid(), name: itemName, checked: false});
 }
 
 function handleNewItemSubmit() {
@@ -60,8 +89,8 @@ function handleNewItemSubmit() {
 }
 
 function toggleCheckedForListItem(itemId) {
-  console.log("Toggling checked property for item with id " + itemId);
-  const item = STORE.find(item => item.id === itemId);
+  console.log('Toggling checked property for item with id ' + itemId);
+  const item = STORE.items.find(item => item.id === itemId);
   item.checked = !item.checked;
 }
 
@@ -73,7 +102,7 @@ function getItemIdFromElement(item) {
 }
 
 function handleItemCheckClicked() {
-  $('.js-shopping-list').on('click', `.js-item-toggle`, event => {
+  $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     console.log('`handleItemCheckClicked` ran');
     const id = getItemIdFromElement(event.currentTarget);
     toggleCheckedForListItem(id);
@@ -85,8 +114,31 @@ function handleItemCheckClicked() {
 function handleDeleteItemClicked() {
   // this function will be responsible for when users want to delete a shopping list
   // item
-  console.log('`handleDeleteItemClicked` ran')
+  $('.js-shopping-list').on('click','.js-item-delete',e=>{
+    let itemToRemove = STORE.items.find(x=>x.id === getItemIdFromElement(e.currentTarget));
+    STORE.items.splice(STORE.items.indexOf(itemToRemove),1);
+    renderShoppingList();
+
+  });
+  console.log('`handleDeleteItemClicked` ran');
 }
+//// MY NEW CODE
+function handleHideCheckedTogg(){
+  //add events for the hide check change
+
+  $('#js-checkBox').change((e)=>{
+    STORE.hide = !STORE.hide;  
+    renderShoppingList();
+  });
+
+  //todo call render
+}
+
+
+
+
+
+//// end my code
 
 // this function will be our callback when the page loads. it's responsible for
 // initially rendering the shopping list, and activating our individual functions
@@ -97,6 +149,7 @@ function handleShoppingList() {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  handleHideCheckedTogg();
 }
 
 // when the page loads, call `handleShoppingList`
