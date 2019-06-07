@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 'use strict';
-/**eslint-env jquery */
+/*eslint-env jquery */
+
 // a template class for items
 /**
  *  @param {string,bool} name and if it is checked, checked is otional
@@ -35,6 +36,9 @@ function generateItemElement(item) {
         </button>
         <button class="shopping-item-delete js-item-delete">
             <span class="button-label">delete</span>
+        </button>
+        <button class="shopping-item-edit js-item-edit">
+            <span class="button-label">Edit</span>
         </button>
       </div>
     </li>`;
@@ -131,7 +135,15 @@ function handleHideCheckedTogg(){
     renderShoppingList();
   });
 
-  //todo call render
+}
+function handleEdit(){
+  $('.js-shopping-list').on('click','.js-item-edit',e=>{
+    const id = getItemIdFromElement(event.target);
+    e.preventDefault();
+    let userInput = prompt('New name:');
+    STORE.items.find(x=>x.id===id).name = userInput;
+    renderShoppingList();
+  });
 }
 
 
@@ -150,6 +162,7 @@ function handleShoppingList() {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleHideCheckedTogg();
+  handleEdit();
 }
 
 // when the page loads, call `handleShoppingList`
